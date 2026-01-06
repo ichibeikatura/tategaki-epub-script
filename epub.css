@@ -1,0 +1,31 @@
+@charset "UTF-8";
+
+html {
+  /* 縦書き設定 */
+  -epub-writing-mode: vertical-rl;
+  -ms-writing-mode: vertical-rl;
+  writing-mode: vertical-rl;
+  direction: ltr; /* ページ送りの方向ではなく文字の方向 */
+}
+
+body {
+  font-family: "HiraMinProN-W3", "Hiragino Mincho ProN", serif;
+  margin: 5%;
+  line-height: 1.8;
+}
+
+/* 日付と名前の行（H2相当として扱う）のデザイン */
+h2 {
+  font-size: 1.2em;
+  margin-left: 2em; /* 縦書きなので上ではなく左にマージン */
+  text-indent: 0;
+  border-right: 2px solid #333; /* 縦書きなので右側に線 */
+  padding-right: 0.5em;
+}
+
+/* 引用部分 */
+blockquote {
+  margin-top: 2em;
+  font-size: 0.9em;
+  color: #555;
+}

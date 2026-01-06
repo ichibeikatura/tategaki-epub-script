@@ -1,0 +1,19 @@
+# config.py - ローカル設定ファイル
+# このファイルを config.py にリネームして使用してください。
+# config.py は .gitignore で除外されます。
+
+# CSS ファイルのパス
+# css_path = "/path/to/your/epub.css"
+
+# 出力ディレクトリ（Bibi連携を使わない場合）
+# output_dir = "/path/to/output"
+
+# 一時ファイルの保存先
+# temp_epub = "/tmp/temp.epub"
+
+# --- Bibi連携設定（macOS向け） ---
+# Bibi展開先ディレクトリ（設定するとBibi連携が有効になる）
+# bibi_dir = "/Library/WebServer/Documents/bibi-bookshelf/epub"
+
+# 再起動するアプリ名（Safari Web App等）
+# app_name = "epub"
