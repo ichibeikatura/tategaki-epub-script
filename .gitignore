@@ -1,5 +1,11 @@
 # 状態・一時ファイル
 .DS_Store
+__pycache__/
+/temp.epub
+
+# 生成物
+/output/
+/EPUB/
 
 # 個人用
 /config.py

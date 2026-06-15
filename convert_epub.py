@@ -36,22 +36,39 @@ if _config_path.exists():
 
 def convert_content(content: str) -> tuple[str, str]:
     """コンテンツを整形し、タイトルを抽出する。"""
-    # タイトル抽出
     title_match = re.search(r'^#title:\s*(.+)$', content, re.MULTILINE)
     title = title_match.group(1).strip() if title_match else "No Title"
-    
-    # タイトル行を削除
-    content = re.sub(r'^#title:.*$', '', content, flags=re.MULTILINE)
+    content = re.sub(r'^#title:.*$\n?', '', content, flags=re.MULTILINE)
 
-    # 日付と名前の見出し化（Pandocのテーブル誤認防止）
-    content = re.sub(
-        r'^(\d{4}年\d{1,2}月\d{1,2}日\s*\|\s*[^\s\n]+)\s*(.*)$', 
-        r'\n\n## \1\n\n\2\n\n', 
-        content, 
-        flags=re.MULTILINE
-    )
-    
-    return title, content
+    book_info_re = re.compile(r'^.+\s\d{4}$')
+    timestamp_re = re.compile(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}:')
+    url_re = re.compile(r'^https?://')
+    page_re = re.compile(r'^p\d+')
+
+    output_lines = []
+    for line in content.split('\n'):
+        s = line.rstrip()
+        if not s:
+            output_lines.append('')
+        elif url_re.match(s):
+            output_lines.append(f'<{s}>')
+            output_lines.append('')
+        elif timestamp_re.match(s):
+            output_lines.append(s)
+            output_lines.append('')
+        elif page_re.match(s):
+            m = page_re.match(s)
+            page_num = m.group(0)
+            rest = s[len(page_num):].strip()
+            line = f'（{page_num}）{rest}' if rest else f'（{page_num}）'
+            output_lines.append(line)
+            output_lines.append('')
+        elif book_info_re.match(s):
+            output_lines.append(f'\n**{s}**\n')
+        else:
+            output_lines.append(s)
+
+    return title, '\n'.join(output_lines)
 
 
 def generate_epub(content: str, title: str, css_path: Path, output_path: Path) -> None:
@@ -126,22 +143,21 @@ def main():
     
     # EPUB生成
     generate_epub(content, title, css_path, temp_epub)
-    
-    # Bibi連携が設定されている場合
+
+    # Bibi連携が設定されている場合は展開（+アプリ再起動）
     bibi_dir = CONFIG.get("bibi_dir")
     app_name = CONFIG.get("app_name")
-    
+
     if bibi_dir:
         deploy_to_bibi(temp_epub, Path(bibi_dir))
         if app_name:
             restart_app(app_name)
-        temp_epub.unlink(missing_ok=True)
-    else:
-        # 通常出力：outputディレクトリにEPUBとして保存
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_file = output_dir / f"{title}.epub"
-        shutil.move(temp_epub, output_file)
-        print(f"Created: {output_file}")
+
+    # Bibi連携の有無にかかわらず、output に .epub を残す（iBooks等で使える）
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / f"{title}.epub"
+    shutil.move(temp_epub, output_file)
+    print(f"Created: {output_file}")
 
 
 if __name__ == "__main__":
